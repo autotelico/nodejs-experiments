@@ -1,11 +1,18 @@
-const fs = require('node:fs/promises')
+const http = require('http');
+const fs = require('fs');
+const url = require('url');
 
-async function writeStuff() {
-    try {
-        fs.writeFile('./README.md', 'All of my personal Node.js experiments go here.')
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-writeStuff()
+http.createServer((req, res) => {
+    console.log(req);
+    const q = url.parse(req.url, true);
+    const filename = `.${q.pathname}`
+    fs.readFile(filename, (err, data) => {
+        if (err) {
+            res.writeHead(404, {'Content-Type': 'text/html'});
+            return res.end('404 Not Found');
+        }
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.write(data)
+        return res.end();
+    })
+}).listen(8080)
